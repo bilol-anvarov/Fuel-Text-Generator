@@ -15,12 +15,12 @@ const cleanPriceString = (priceString) => {
 
 
 function App() {
-
+  const [monitoringText, setMonitoringText] = useState('Paste text')
 
 
 
   const [inputText, setInputText] = useState('');
-  const [formattedText, setFormattedText] = useState('');
+  const [formattedText, setFormattedText] = useState('Paste text');
   const [selectedTime, setSelectedTime] = useState('day');
   const [selectedType, setSelectedType] = useState('type 1');
 
@@ -32,11 +32,12 @@ function App() {
 
   const regexPatterns = {
     address: /\d{1,5} [A-Za-z0-9 .,'-]+, [A-Za-z .'-]+, [A-Z]{2} \d{5}/,
-    station: /(Pilot|Flying J) (?:Travel Center)? #(\d+)/,
+    station: /(Pilot|Flying J).*#(\d+)/,
     retailPrice: /RETAIL PRICE\s+\$(\d+\.\d+)/,
     rtsPrice: /RTS PRICE\s+\$(\d+\.\d+)/,
     distance: /(\d+ Miles Away)/,
-    exit: /I-\d{1,2}\/I-\d{1,2}, Exit \d+/,
+    exit: /I-\d+(?:[\/&][A-Z\d ]+)?(?:[\/&][A-Z\d ]+)?(?:[\/&][A-Z\d ]+)?(?:[\/&][A-Z\d ]+)?, Exit \d+/,
+    regex: /(\w+),\s*(\w{2})\s*\d{5}/, 
   };
 
 
@@ -62,12 +63,19 @@ function App() {
   
     switch (selectedType) {
       case 'type 2':
-        return `${baseText}${exitText}\n\nGood ${selectedTime},\nCould you refuel at this station boss!`;
+        return `${baseText}${exitText}\n\nGood ${selectedTime},\nPlease note to refuel at this station sir!`;
       case 'type 3':
         return `${baseText}${exitText}`;
       default:
         return `${baseText}${exitText}\n\nGood ${selectedTime} sir, how are you today?\nCan you fill up in this station, please!`;
     }
+  };
+  const generateFormattedMonitoringText = (data) => {
+    const baseText = `${data.station}\n${data.address}\nDi: $${data.retailPrice} ($${data.rtsPrice})`;
+
+  
+    return baseText;
+ 
   };
 
 
@@ -95,12 +103,36 @@ function App() {
   };
 
 
+  const formatMonitoringInfo = (text) => {
+    const data = {
+      address: extractData(text, regexPatterns.regex).toUpperCase(),
+      station: (() => {
+        const match = text.match(regexPatterns.station);
+        return match ? `${match[1]} #${match[2]}` : 'Unknown Station';
+      })(),
+
+
+
+      retailPrice: cleanPriceString(extractData(text, regexPatterns.retailPrice)),
+      rtsPrice: cleanPriceString(extractData(text, regexPatterns.rtsPrice)),
+    };
+    return generateFormattedMonitoringText(data);
+  };
+
+
+
 
 
   const handleFormat = () => {
     const result = formatStationInfo(inputText);
     setFormattedText(result);
+    
+    const resultTwo = formatMonitoringInfo(inputText);
+    setMonitoringText(resultTwo);
   };
+
+
+
 
   const handleCopy = () => {
     navigator.clipboard.writeText(formattedText).then(() => {
@@ -232,7 +264,20 @@ function App() {
         <ToastContainer />
       </main>
       <aside>
-        <h2>UNAVAILABLE</h2>
+
+
+
+        <pre className='draggable two'>{monitoringText}</pre>
+
+
+        {monitoringText && <button className='two' onClick={()=>{
+          navigator.clipboard.writeText(monitoringText).then(() => {
+            toast.success('Copied!', { position: 'top-right', autoClose: 3000 });
+          }, () => {
+            toast.error('Failed to copy text', { position: 'top-right', autoClose: 3000 });
+          });
+        }}>Copy to Clipboard</button>}
+
       </aside>
     </>
   );

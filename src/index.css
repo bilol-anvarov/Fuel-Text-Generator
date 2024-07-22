@@ -36,8 +36,28 @@ body {
 
 pre{
   text-align: left;
+  background-color: #1a1a1a;
+  padding: 15px 20px;
+  border-radius: 8px;
+  border: transparent solid 1px;
+  cursor: text;
+  transition: all 0.2s ease-in-out;
 }
 
+
+pre.two{
+  background-color: #242424;
+  text-align: center;
+}
+pre:hover{
+  border: solid #535bf2 1px;
+}
+
+button.two{
+  background-color: #242424;
+  width: 100%;
+  margin-top: 20px;
+}
 
 header{
   color: #ffffff;
@@ -59,12 +79,9 @@ header h2{
   word-wrap: break-word;
   overflow: auto;
   max-width: 100%;
-  cursor: grab;
 }
 
-.draggable:active {
-  cursor: grabbing;
-}
+
 
 main{
   width: 100%;
