@@ -13,6 +13,18 @@ const cleanPriceString = (priceString) => {
 
 
 
+const cleanAddress = (addressString) => {
+  // Используем регулярное выражение для извлечения города
+  if(addressString){
+    const match = addressString.match(/,\s([A-Za-z\s]+, [A-Z]{2}) \d{5}/);
+    return match ? match[1] : 'Unknown';
+  } else{
+    return 'Unknown'
+  }
+};
+
+
+
 
 function App() {
   const [monitoringText, setMonitoringText] = useState('Paste text')
@@ -37,7 +49,8 @@ function App() {
     rtsPrice: /RTS PRICE\s+\$(\d+\.\d+)/,
     distance: /(\d+ Miles Away)/,
     exit: /I-\d+(?:[\/&][A-Z\d ]+)?(?:[\/&][A-Z\d ]+)?(?:[\/&][A-Z\d ]+)?(?:[\/&][A-Z\d ]+)?, Exit \d+/,
-    regex: /(\w+),\s*(\w{2})\s*\d{5}/, 
+    
+    cityState: /,\s([A-Za-z\s]+, [A-Z]{2}) \d{5}/,
   };
 
 
@@ -105,7 +118,7 @@ function App() {
 
   const formatMonitoringInfo = (text) => {
     const data = {
-      address: extractData(text, regexPatterns.regex).toUpperCase(),
+      address: cleanAddress(extractData(text, regexPatterns.address)),
       station: (() => {
         const match = text.match(regexPatterns.station);
         return match ? `${match[1]} #${match[2]}` : 'Unknown Station';
